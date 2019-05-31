@@ -1,0 +1,122 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="ko" lang="ko">
+<head>
+<title>Smart Acess</title>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no" />
+<script type="text/javascript" src="jquery.min.js"></script>
+<script type="text/javascript" src="qrcode.js"></script>
+<script type="text/javascript" src="../smt/webservice/webservice.js"></script>
+    <style type="text/css">
+
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+        }
+
+
+        #logo {
+            width: 100%;
+            height: 20em;
+            background: url("assets/images/anima.jpg");
+            background-repeat: no-repeat;
+            background-position: center center;
+            background-size: cover;
+        }
+
+        #qrcode {
+            position: relative;
+            left: 50%;
+            margin-left: -100px;
+            margin-bottom: 2em;
+            display: table;
+            clear-after: both;
+            min-height: 100px;
+            width: 100px;
+            height: 100px;
+            margin-top: 15px;
+        }
+
+        .infoauth {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #009500;
+            margin: 1em;
+            border: 1px solid #00c200;
+            border-radius: 0.6em;
+        }
+
+        .bottom {
+            height: 1em;
+            width: 100%;
+        }
+
+        #maps {
+            width: 100%;
+            height: 20em;
+            display: inline-block;
+            clear-after: both;
+        }
+
+    </style>
+</head>
+<body>
+<div id="logo"></div>
+<div id="informativo">
+    <p>Este código é válido somente uma vez</p>
+    <p>Valido até: <b id="validade"></b></p>
+    <p>Você está utilizando uma autorização pessoal</p>
+</div>
+<div id="codigo">
+    <p>Código de acesso</p>
+    <div class="infoauth" id="authseq"></div>
+    <div class="infoauth" id="authname"></div>
+</div>
+<div id="qrcode"></div>
+<div class="bottom"></div>
+<div><a href="R. Braga, 202 - Vila Lusitania, São Bernardo do Campo - SP, 09725-160"></a></div>
+<iframe id="maps" src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3653.0618882074805!2d-46.559295885399095!3d-23.709483872963236!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x94ce4330e59c132d%3A0x562d3dca3e3b6e5c!2s%C3%82nima+Clube+Parque+Condom%C3%ADnio!5e0!3m2!1spt-BR!2sbr!4v1553028146656" frameborder="0" style="border:0" allowfullscreen></iframe>
+<script type="text/javascript">
+let qrcode = new QRCode(document.getElementById("qrcode"), {
+	width : 200,
+	height : 200
+});
+
+function makeCode () {
+
+    let code = new URL(window.location).searchParams.get("a");
+    let res = code.split('-');
+
+    let webservice = new Webservice();
+    webservice.Request({
+        process: 'easypass.find',
+        params: JSON.stringify({
+            code: code
+        })
+    }, function (http) {
+
+        if (http.response === 'null' || http.response === 'false') {
+            return;
+        }
+
+        document.getElementById('authseq').innerText = res[4].toUpperCase();
+
+        let result = JSON.parse(JSON.parse(http.response)[0].find)[0];
+        document.getElementById('authname').innerText = result.nome;
+        document.getElementById('validade').innerText = result.validade;
+
+        if (result.hora === 0)
+            qrcode.makeCode(code);
+
+    });
+
+	
+}
+
+makeCode();
+
+</script>
+</body>
